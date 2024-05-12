@@ -83,13 +83,13 @@ export default function Home({url}){
                                 {products.map(product => {
                                     return <Card key={product.id} product={product} />
                                 })}
-                                <div className="join w-full flex justify-center">
+                            </main>
+                        )}
+                        <div className="join w-full flex justify-center">
                                     {[...Array(pagination)].map((x,i) => 
                                     <button type="button" className="join-item btn btn-square" name="options" aria-label="1" onClick={() => setPage(i +1)} key={i}checked> {i +1}</button>
                                     )}
-                                </div>
-                            </main>
-                        )}
+                        </div>
                     </div>
                     
         </>
