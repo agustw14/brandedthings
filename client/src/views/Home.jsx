@@ -1,23 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Card from "../component/Card";
-import ReactPaginate from 'react-paginate';
-
-const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-
-function Items({ currentItems }) {
-  return (
-    <>
-      {currentItems &&
-        currentItems.map((item) => (
-          <div>
-            <h3>Item #{item}</h3>
-          </div>
-        ))}
-    </>
-  );
-}
-
 
 
 export default function Home({url}){
@@ -26,23 +9,13 @@ export default function Home({url}){
     const [search, setSearch]= useState('')
     const [filter, setFilter] = useState('')
     const [sort, setSort] = useState('DESC')
-    const [itemOffset, setItemOffset] = useState(0);
-    const endOffset = itemOffset + 4;
-    console.log(`Loading items from ${itemOffset} to ${endOffset}`);
-    const currentItems = items.slice(itemOffset, endOffset);
-    const pageCount = Math.ceil(items.length / 4);
-
-    const handlePageClick = (event) => {
-        const newOffset = (event.selected * 4) % items.length;
-        console.log(
-        `User requested page number ${event.selected}, which is offset ${newOffset}`
-        );
-        setItemOffset(newOffset);
-    };
+    const [pagination, setPagination] = useState(0)
+    const [page, setPage]= useState(1)
+    
 
     async function fetchProduct(){
         try {
-            const {data} = await axios.get(`${url}/apis/pub/branded-things/products?q=${search}&i=${filter}&sort=${sort}&limit=4&page=${currentItems}`)
+            const {data} = await axios.get(`${url}/apis/pub/branded-things/products?q=${search}&i=${filter}&sort=${sort}&limit=10&page=${page}`)
             const filterCategori = await axios.get(`${url}/apis/pub/branded-things/categories`)
         
 
@@ -50,14 +23,15 @@ export default function Home({url}){
             
             setProducts(data.data.query)
             setCategories(filterCategori.data.data)
+            setPagination(data.data.pagination.totalPage)
             
         } catch (error) {
             console.log(error)
         }
     }
     useEffect(() => {
-        fetchProduct()
-    }, [search, filter, sort, currentItems])
+        fetchProduct();
+    }, [search, filter, sort, page])
     return  (
         <>
                 <br/>
@@ -75,7 +49,7 @@ export default function Home({url}){
                             <div className="flex w-auto flex-col md:flex-row md:space-x-2 items-center">
                                 <span className="font-medium text-gray-600 text-black">Filter by :</span>
                                 <select className="select select-bordered" name="filter" onChange={(e) => setFilter(e.target.value)}>
-                                    <option value="" selected>Select Categories</option>
+                                    <option value="">Select Categories</option>
                                     {categories.map(cat => (
                                         <option key={cat.id} value={cat.name}>{cat.name}</option>
                                     ))}
@@ -98,14 +72,11 @@ export default function Home({url}){
                             })}
                             </div>
                         </main>
-                        <div className="flex flex-col md:flex-row justify-center items-center m-5 gap-5">
-                                    <ReactPaginate breakLabel="..." nextLabel="next >" className= "flex flex-col md:flex-row justify-center items-center m-5 gap-5" onPageChange={handlePageClick}
-                                        pageRangeDisplayed={2}
-                                        pageCount={pageCount}
-                                        previousLabel="< previous"
-                                        renderOnZeroPageCount={null}
-                                />
-                            </div>
+                        <div className="join w-full flex justify-center">
+                            {[...Array(pagination)].map((x,i) => 
+                            <button type="button" className="join-item btn btn-square" name="options" aria-label="1" onClick={() => setPage(i +1)} key={i}checked> {i +1}</button>
+                            )}
+                        </div>
                     </div>
                     
         </>
